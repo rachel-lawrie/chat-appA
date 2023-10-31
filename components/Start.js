@@ -2,6 +2,8 @@ import { useState } from "react";
 import {
   Button,
   ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -21,76 +23,87 @@ const Start = ({ navigation }) => {
 
   // First screen to enter name and go to second screen
   return (
-    <View style={styles.container}>
-      <ImageBackground
-        style={styles.backgroundImage}
-        source={require("../assets/background-image.png")}
-      >
-        <Text style={styles.appTitle}>Chat App</Text>
+    <View style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <ImageBackground
+          style={styles.backgroundImage}
+          source={require("../assets/background-image.png")}
+        >
+          <Text style={styles.appTitle}>Chat App</Text>
 
-        <View style={styles.startSelection}>
-          <TextInput
-            style={styles.textInput}
-            value={name}
-            onChangeText={setName}
-            placeholder="Your Name"
-          />
+          <View style={styles.startSelection}>
+            <TextInput
+              style={styles.textInput}
+              value={name}
+              onChangeText={setName}
+              placeholder="Your Name"
+            />
 
-          <View style={styles.backgroundColorContainer}>
-            <Text style={styles.textBackground}>Choose Background Color:</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.colorButton,
-                  { backgroundColor: "#090C08" },
-                  selectedColor === "#090C08" && styles.selectedColorButton,
-                ]}
-                onPress={() => handleColorChange("#090C08")}
-              />
-              <TouchableOpacity
-                style={[
-                  styles.colorButton,
-                  { backgroundColor: "#474056" },
-                  selectedColor === "#474056" && styles.selectedColorButton,
-                ]}
-                onPress={() => handleColorChange("#474056")}
-              />
-              <TouchableOpacity
-                style={[
-                  styles.colorButton,
-                  { backgroundColor: "#8A95A5" },
-                  selectedColor === "#8A95A5" && styles.selectedColorButton,
-                ]}
-                onPress={() => handleColorChange("#8A95A5")}
-              />
-              <TouchableOpacity
-                style={[
-                  styles.colorButton,
-                  { backgroundColor: "#B9C6AE" },
-                  selectedColor === "#B9C6AE" && styles.selectedColorButton,
-                ]}
-                onPress={() => handleColorChange("#B9C6AE")}
-              />
+            <View style={styles.backgroundColorContainer}>
+              <Text style={styles.textBackground}>
+                Choose Background Color:
+              </Text>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.colorButton,
+                    { backgroundColor: "#090C08" },
+                    selectedColor === "#090C08" && styles.selectedColorButton,
+                  ]}
+                  onPress={() => handleColorChange("#090C08")}
+                />
+                <TouchableOpacity
+                  style={[
+                    styles.colorButton,
+                    { backgroundColor: "#474056" },
+                    selectedColor === "#474056" && styles.selectedColorButton,
+                  ]}
+                  onPress={() => handleColorChange("#474056")}
+                />
+                <TouchableOpacity
+                  style={[
+                    styles.colorButton,
+                    { backgroundColor: "#8A95A5" },
+                    selectedColor === "#8A95A5" && styles.selectedColorButton,
+                  ]}
+                  onPress={() => handleColorChange("#8A95A5")}
+                />
+                <TouchableOpacity
+                  style={[
+                    styles.colorButton,
+                    { backgroundColor: "#B9C6AE" },
+                    selectedColor === "#B9C6AE" && styles.selectedColorButton,
+                  ]}
+                  onPress={() => handleColorChange("#B9C6AE")}
+                />
+              </View>
             </View>
-          </View>
 
-          <TouchableOpacity
-            style={styles.startChattingButton}
-            onPress={() =>
-              navigation.navigate("Chat", {
-                name: name,
-                backgroundColor: backgroundColor,
-              })
-            }
-          >
-            <Text
-              style={{ color: "#FFFFFF", fontWeight: 600, textAlign: "center" }}
+            <TouchableOpacity
+              style={styles.startChattingButton}
+              onPress={() =>
+                navigation.navigate("Chat", {
+                  name: name,
+                  backgroundColor: backgroundColor,
+                })
+              }
             >
-              Start Chatting
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ImageBackground>
+              <Text
+                style={{
+                  color: "#FFFFFF",
+                  fontWeight: 600,
+                  textAlign: "center",
+                }}
+              >
+                Start Chatting
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
+      </View>
+      {Platform.OS === "ios" ? (
+        <KeyboardAvoidingView behavior="padding" />
+      ) : null}
     </View>
   );
 };
