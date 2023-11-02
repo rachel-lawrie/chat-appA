@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 const Start = ({ navigation }) => {
   const [name, setName] = useState("");
@@ -19,6 +20,26 @@ const Start = ({ navigation }) => {
   const handleColorChange = (color) => {
     setBackgroundColor(color);
     setSelectedColor(color);
+  };
+
+  const auth = getAuth();
+
+  const signInUser = () => {
+    signInAnonymously(auth)
+      .then((result) => {
+        if (result.user && result.user.uid) {
+          navigation.navigate("Chat", {
+            name: name,
+            backgroundColor: backgroundColor,
+            userID: result.user.uid,
+          });
+        } else {
+          Alert.alert("Unable to enter chat due to authentication failure.");
+        }
+      })
+      .catch((error) => {
+        Alert.alert("Unable to enter chat due to an error.");
+      });
   };
 
   // First screen to enter name and go to second screen
@@ -81,12 +102,7 @@ const Start = ({ navigation }) => {
 
             <TouchableOpacity
               style={styles.startChattingButton}
-              onPress={() =>
-                navigation.navigate("Chat", {
-                  name: name,
-                  backgroundColor: backgroundColor,
-                })
-              }
+              onPress={signInUser}
             >
               <Text
                 style={{
