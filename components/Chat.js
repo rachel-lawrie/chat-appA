@@ -6,7 +6,7 @@ import {
   View,
   Text,
 } from "react-native";
-import { Bubble, GiftedChat } from "react-native-gifted-chat";
+import { Bubble, GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import {
   addDoc,
   collection,
@@ -17,24 +17,26 @@ import {
   where,
 } from "firebase/firestore";
 
-const Chat = ({ route, navigation, db }) => {
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const Chat = ({ db, isConnected, navigation, route }) => {
   const { name, backgroundColor, userID } = route.params || {
     backgroundColor: "#FFFFFF",
   };
   const [messages, setMessages] = useState([]);
 
-  // will make call to database and then update messages with the messages from the data base with setMessages, this will be an async function,
-  // then call that function inside useEffect (actually, if using onSnapshot, then can put that directly in useEffect, will need to pass
-  // uid:userID)
+  const loadCachedMessages = async () => {
+    const cachedMessages = (await AsyncStorage.getItem("local_messages")) || [];
+    setMessages(JSON.parse(cachedMessages));
+  };
 
-  // will make another const = async function to add messages to database, when updated, call setMessages so the chat updates w/ the newly added message
-
-  // potential new code
+  let unsubMessages;
   useEffect(() => {
     navigation.setOptions({ title: name });
-    const unsubMessages = onSnapshot(
-      query(collection(db, "messages"), orderBy("createdAt", "desc")),
-      (documentsSnapshot) => {
+
+    if (isConnected === true) {
+      const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+      unsubMessages = onSnapshot(q, async (documentsSnapshot) => {
         let newMessages = [];
         documentsSnapshot.forEach((doc) => {
           const messageData = doc.data();
@@ -42,15 +44,25 @@ const Chat = ({ route, navigation, db }) => {
           const createdAt = createdAtTimestamp.toDate(); // Convert Firestore Timestamp to Date
           newMessages.push({ id: doc.id, ...messageData, createdAt });
         });
+        cacheMessages(newMessages);
         setMessages(newMessages);
-      }
-    );
+      });
+    } else loadCachedMessages();
 
     // Clean up code
     return () => {
       if (unsubMessages) unsubMessages();
+      unsubMessages = null;
     };
-  }, []);
+  }, [isConnected]);
+
+  const cacheMessages = async (messagesToCache) => {
+    try {
+      await AsyncStorage.setItem("local_messages", JSON.stringify(newMessages));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   const onSend = (newMessages) => {
     // Add the new message to the database
@@ -72,6 +84,12 @@ const Chat = ({ route, navigation, db }) => {
         }}
       />
     );
+  };
+
+  // Don't show the input bar if no connection
+  const renderInputToolbar = (props) => {
+    if (isConnected) return <InputToolbar {...props} />;
+    else return null;
   };
 
   // Second screen that shows the name entered in the first screen

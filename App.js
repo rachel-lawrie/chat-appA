@@ -14,7 +14,13 @@ import { StyleSheet, Text, View } from "react-native";
 
 // establish Firestore connection
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import {
+  disableNetwork,
+  enableNetwork,
+  getFirestore,
+} from "firebase/firestore";
+import { useNetInfo } from "@react-native-community/netinfo";
+import { useEffect } from "react";
 
 const App = () => {
   const firebaseConfig = {
@@ -32,13 +38,32 @@ const App = () => {
   // Initialize Cloud Firestore and get a reference to the service
   const db = getFirestore(app);
 
+  // Check for internet connection
+  const connectionStatus = useNetInfo();
+
+  // Alert user if connection is lost
+  useEffect(() => {
+    if (connectionStatus.isConnected === false) {
+      Alert.alert("Connection lost!");
+      disableNetwork(db);
+    } else if (connectionStatus.isConnected === true) {
+      enableNetwork(db);
+    }
+  }, [connectionStatus.isConnected]);
+
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Start">
         <Stack.Screen name="Start" component={Start} />
         <Stack.Screen name="Chat">
           {/* Pass the database connection to the Chat component, note new way to pass props */}
-          {(props) => <Chat db={db} {...props} />}
+          {(props) => (
+            <Chat
+              isConnected={connectionStatus.isConnected}
+              db={db}
+              {...props}
+            />
+          )}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
