@@ -14,8 +14,6 @@ import MapView from "react-native-maps";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
-// represents the URI source of the image selected from the gallery (or taken from the camera)
-
 const CustomActions = ({
   wrapperStyle,
   iconTextStyle,
