@@ -16,10 +16,11 @@ import {
   query,
   where,
 } from "firebase/firestore";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomActions from "./CustomActions";
+import MapView from "react-native-maps";
 
-const Chat = ({ db, isConnected, navigation, route }) => {
+const Chat = ({ db, isConnected, navigation, route, storage }) => {
   const { name, backgroundColor, userID } = route.params || {
     backgroundColor: "#FFFFFF",
   };
@@ -58,7 +59,10 @@ const Chat = ({ db, isConnected, navigation, route }) => {
 
   const cacheMessages = async (messagesToCache) => {
     try {
-      await AsyncStorage.setItem("local_messages", JSON.stringify(newMessages));
+      await AsyncStorage.setItem(
+        "local_messages",
+        JSON.stringify(messagesToCache)
+      );
     } catch (error) {
       console.log(error.message);
     }
@@ -92,6 +96,28 @@ const Chat = ({ db, isConnected, navigation, route }) => {
     else return null;
   };
 
+  const renderCustomActions = (props) => {
+    return <CustomActions storage={storage} userID={userID} {...props} />;
+  };
+
+  const renderCustomView = (props) => {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
   // Second screen that shows the name entered in the first screen
   return (
     // <View style={[styles.container, { backgroundColor: backgroundColor }]}>
@@ -99,12 +125,14 @@ const Chat = ({ db, isConnected, navigation, route }) => {
       <GiftedChat
         messages={messages}
         renderBubble={renderBubble}
-        // do I need to make this newMessages?
+        renderInputToolbar={renderInputToolbar}
         onSend={(newMessages) => onSend(newMessages)}
         user={{
           _id: userID,
           name: name,
         }}
+        renderActions={renderCustomActions}
+        renderCustomView={renderCustomView}
       />
       {Platform.OS === "android" ? (
         <KeyboardAvoidingView behavior="height" />

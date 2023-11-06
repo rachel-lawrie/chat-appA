@@ -10,10 +10,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 const Stack = createNativeStackNavigator();
 
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 
 // establish Firestore connection
 import { initializeApp } from "firebase/app";
+import { getStorage } from "firebase/storage";
 import {
   disableNetwork,
   enableNetwork,
@@ -37,6 +38,8 @@ const App = () => {
 
   // Initialize Cloud Firestore and get a reference to the service
   const db = getFirestore(app);
+  // Initialize Firebase Storage
+  const storage = getStorage(app);
 
   // Check for internet connection
   const connectionStatus = useNetInfo();
@@ -61,6 +64,7 @@ const App = () => {
             <Chat
               isConnected={connectionStatus.isConnected}
               db={db}
+              storage={storage}
               {...props}
             />
           )}
@@ -72,8 +76,6 @@ const App = () => {
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
-
-// Now there are two app consts so will need to address that
 
 const styles = StyleSheet.create({
   container: {
